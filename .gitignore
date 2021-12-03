@@ -3,3 +3,5 @@ Cargo.lock
 dist
 .idea
 web3/node_modules
+programs/ovn/target
+test-ledger
