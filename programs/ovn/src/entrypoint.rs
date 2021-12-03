@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::io::Read;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -25,6 +27,11 @@ use mercurial_stable_swap_n_pool_instructions;
 //     pub counter: u32
 // }
 
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct Data {
+    pub data: String
+}
+
 entrypoint!(process_instruction);
 
 pub fn process_instruction(program_id: &Pubkey,
@@ -32,6 +39,9 @@ pub fn process_instruction(program_id: &Pubkey,
                            _instruction_data: &[u8]
 ) -> ProgramResult {
     log::sol_log("HEY");
+    // let data = borsh::BorshDeserialize::try_from_slice(&_instruction_data.borrow());
+    let mut data = Data::try_from_slice(&_instruction_data.borrow()).unwrap();
+    log::sol_log(&data.data);
     // mercurial_stable_swap_n_pool_instructions::instruction::exchange()
     // let account_iter = &mut accounts.iter();
     //

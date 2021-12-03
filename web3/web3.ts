@@ -47,6 +47,19 @@ const GREETING_SIZE = borsh.serialize(
     new GreetingAccount(),
 ).length;
 
+class Data {
+    data: string = '';
+
+    constructor(fields: {data: string} | undefined = undefined) {
+        if(fields) {
+            this.data = fields.data
+        }
+    }
+}
+
+const DataSchema = new Map([
+    [Data, {kind: 'struct', fields: [['data', 'string']]}],
+]);
 
 // Read program id from keypair file
 async function checkProgram() {
@@ -154,10 +167,13 @@ export async function establishConnection(): Promise<void> {
 
 export async function executeProgram(): Promise<void> {
     // console.log('Saying hello to', greetedPubkey.toBase58());
+    // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
+    const data = borsh.serialize(DataSchema, new Data({data: "sdgdfg"}))
     const instruction = new TransactionInstruction({
         keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
         programId,
-        data: Buffer.alloc(0), // All instructions are hellos
+        data: Buffer.from(data)
+        // data: Buffer.alloc(0), // All instructions are hellos
     });
     await sendAndConfirmTransaction(
         connection,
