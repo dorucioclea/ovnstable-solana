@@ -2,3 +2,4 @@ target
 Cargo.lock
 dist
 .idea
+web3/node_modules

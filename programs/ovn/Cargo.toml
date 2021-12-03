@@ -13,6 +13,9 @@ borsh = "0.9.1"
 borsh-derive = "0.9.1"
 spl-token = "3.2.0"
 
+[dependencies.mercurial_stable_swap_n_pool_instructions]
+path = "/Users/evgenijzaharov/CLionProjects/stable-swap-n-pool-instructions"
+
 [dev-dependencies]
 solana-sdk = "1.8.5"
 solana-program-test = "1.8.5"
