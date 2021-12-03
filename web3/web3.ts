@@ -47,18 +47,25 @@ const GREETING_SIZE = borsh.serialize(
     new GreetingAccount(),
 ).length;
 
-class Data {
-    data: string = '';
+enum Method {
+    MINT
+}
 
-    constructor(fields: {data: string} | undefined = undefined) {
+class ProgramData {
+    method: Method = Method.MINT
+    args: number = 0
+    // data: string = '';
+
+    constructor(fields: {method: Method, args: number} | undefined = undefined) {
         if(fields) {
-            this.data = fields.data
+            this.method = fields.method;
+            this.args = fields.args;
         }
     }
 }
 
 const DataSchema = new Map([
-    [Data, {kind: 'struct', fields: [['data', 'string']]}],
+    [ProgramData, {kind: 'struct', fields: [['method', 'u8'], ['args', 'u128']]}],
 ]);
 
 // Read program id from keypair file
@@ -168,7 +175,7 @@ export async function establishConnection(): Promise<void> {
 export async function executeProgram(): Promise<void> {
     // console.log('Saying hello to', greetedPubkey.toBase58());
     // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
-    const data = borsh.serialize(DataSchema, new Data({data: "sdgdfg"}))
+    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: 123}))
     const instruction = new TransactionInstruction({
         keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
         programId,

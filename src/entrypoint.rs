@@ -1,5 +1,7 @@
+use self::super::structs::{ProgramData, Method};
+use self::super::processors::{mint_contract};
+
 use std::borrow::Borrow;
-use std::io::Read;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -12,6 +14,8 @@ use solana_program::{
 };
 
 use mercurial_stable_swap_n_pool_instructions;
+use solana_program::log::sol_log;
+use solana_program::program::invoke_signed;
 
 
 // #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -27,10 +31,10 @@ use mercurial_stable_swap_n_pool_instructions;
 //     pub counter: u32
 // }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct Data {
-    pub data: String
-}
+// #[derive(BorshSerialize, BorshDeserialize, Debug)]
+// pub struct ProgramData {
+//     pub data: String
+// }
 
 entrypoint!(process_instruction);
 
@@ -39,9 +43,22 @@ pub fn process_instruction(program_id: &Pubkey,
                            _instruction_data: &[u8]
 ) -> ProgramResult {
     log::sol_log("HEY");
+    let d: ProgramData = ProgramData::try_from_slice(&_instruction_data.borrow())?;
+
+    let program_args: u128 = d.args;
+    let account_iter = &mut accounts.iter();
+
+    let account = next_account_info(account_iter)?;
+    match d.method {
+         Method::MINT => {
+             sol_log("EXECUTE MINT");
+
+             let amount: u64 = program_args as u64;
+             mint_contract(accounts, &amount);
+        }
+    }
     // let data = borsh::BorshDeserialize::try_from_slice(&_instruction_data.borrow());
-    let mut data = Data::try_from_slice(&_instruction_data.borrow()).unwrap();
-    log::sol_log(&data.data);
+    // let mut data = Data::try_from_slice(&_instruction_data.borrow()).unwrap();
     // mercurial_stable_swap_n_pool_instructions::instruction::exchange()
     // let account_iter = &mut accounts.iter();
     //
