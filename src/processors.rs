@@ -12,9 +12,9 @@ use solana_program::program_error::PrintProgramError;
 use spl_token::state::Account;
 
 pub fn mint_contract(sender: &[AccountInfo], amount: &u64) {
-    let token_pub = "CjHBse2bXVAHhtRU8mWRKMuMsGCiWyotQ7rLXwgxWJrB";
+    let token_pub = "2zbux95BEVcb6oCHerAEfosNeQUjZct95TuQNcySQMvL";
     let owner_pub = "5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR";
-    let ming_pub = "EUH6mg1HFTdpb8Bn842k74w4kzfeZGBWzCVuMzWCUN38";
+    let ming_pub = "9sjFya4L53b62uY35fgE8DzqYeZhXM6JMYhJbHmt9PqJ";
     let token_program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
     let cur_program_id = "Ggz2H6KyKsunBKcJd7Xfc9zLjQJYk4taDRHYjhRj8atZ";
 
@@ -47,8 +47,8 @@ pub fn mint_contract(sender: &[AccountInfo], amount: &u64) {
 
 
 
-    let ins = mint_to(&token_program_id_o, &mint_pub_o, &token_pub_o, &mint_pub_o, &[&mint_pub_o], *amount).unwrap();
-    invoke(&ins, &[]).unwrap();
+    let ins = mint_to(&token_program_id_o, &mint_pub_o, &token_pub_o, &owner_pub_o, &[], *amount).unwrap();
+    invoke(&ins, sender).unwrap();
     sol_log(&sender.len().to_string());
 
     // Processor::process(&ins.program_id, &sender, &ins.data).unwrap();

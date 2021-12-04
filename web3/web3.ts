@@ -23,8 +23,8 @@ const PROGRAM_PATH = path.resolve(__dirname, '../dist/ovn');
 const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'ovn-keypair.json');
 const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'ovn.so');
 let greetedPubkey: PublicKey;
-let mintPub: PublicKey = new PublicKey("EUH6mg1HFTdpb8Bn842k74w4kzfeZGBWzCVuMzWCUN38");
-let destAcc: PublicKey = new PublicKey("CjHBse2bXVAHhtRU8mWRKMuMsGCiWyotQ7rLXwgxWJrB");
+let mintPub: PublicKey = new PublicKey("9sjFya4L53b62uY35fgE8DzqYeZhXM6JMYhJbHmt9PqJ");
+let destAcc: PublicKey = new PublicKey("2zbux95BEVcb6oCHerAEfosNeQUjZct95TuQNcySQMvL");
 let ownerPub: PublicKey = new PublicKey("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR");
 let ownerSplPub: PublicKey = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 
