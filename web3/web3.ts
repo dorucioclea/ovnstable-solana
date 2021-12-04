@@ -23,6 +23,10 @@ const PROGRAM_PATH = path.resolve(__dirname, '../dist/ovn');
 const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'ovn-keypair.json');
 const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'ovn.so');
 let greetedPubkey: PublicKey;
+let mintPub: PublicKey = new PublicKey("EUH6mg1HFTdpb8Bn842k74w4kzfeZGBWzCVuMzWCUN38");
+let destAcc: PublicKey = new PublicKey("CjHBse2bXVAHhtRU8mWRKMuMsGCiWyotQ7rLXwgxWJrB");
+let ownerPub: PublicKey = new PublicKey("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR");
+let ownerSplPub: PublicKey = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 
 
 class GreetingAccount {
@@ -103,6 +107,7 @@ async function checkProgram() {
         programId,
     );
 
+
     // Check if the greeting account has already been created
     const greetedAccount = await connection.getAccountInfo(greetedPubkey);
     if (greetedAccount === null) {
@@ -177,7 +182,11 @@ export async function executeProgram(): Promise<void> {
     // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
     const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: 123}))
     const instruction = new TransactionInstruction({
-        keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
+        keys: [{pubkey: mintPub, isSigner: false, isWritable: true},
+            {pubkey: destAcc, isSigner: false, isWritable: true},
+            {pubkey: ownerPub, isSigner: false, isWritable: false},
+            {pubkey: ownerSplPub, isSigner: false, isWritable: false},
+        ],
         programId,
         data: Buffer.from(data)
         // data: Buffer.alloc(0), // All instructions are hellos

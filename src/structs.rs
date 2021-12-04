@@ -1,7 +1,4 @@
-use solana_program::{pubkey::Pubkey};
 use borsh::{BorshDeserialize, BorshSerialize};
-use std::any::{Any};
-use std::borrow::Borrow;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub enum Method {
