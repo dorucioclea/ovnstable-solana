@@ -23,11 +23,11 @@ impl<'a> OVNProcessor {
         OVNProcessor {}
     }
 
-    pub fn process(&self, program_data: &'a ProgramData, account_infos: Vec<AccountInfo<'a>>) {
+    pub fn process(&self, program_data: ProgramData, account_infos: Vec<AccountInfo<'a>>) {
         let ovn = OVNToken::default();
         match program_data.method {
             Method::MINT => {
-                let exchange = Exchange::new(ovn.borrow(), program_data, account_infos);
+                let exchange = Exchange::new(ovn, program_data, account_infos);
                 exchange.mint(3);
                 // mint_contract(account_infos, 3);
             }
@@ -78,7 +78,7 @@ impl<'a> OVNToken {
 }
 
 impl<'a> Exchange<'a> {
-    pub fn new(ovn: &'a OVNToken, program_data: &'a ProgramData, account_infos: Vec<AccountInfo<'a>>) -> Self {
+    pub fn new(ovn: OVNToken, program_data: ProgramData, account_infos: Vec<AccountInfo<'a>>) -> Self {
         Exchange {
             ovn,
             program_data,

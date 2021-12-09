@@ -48,7 +48,7 @@ pub fn process_instruction(program_id: &Pubkey,
     // let program_args: u128 = d.args;
     // let account_iter = &mut accounts.iter();
     let processor = OVNProcessor::new();
-    processor.process(&d, accounts.to_vec());
+    processor.process(d, accounts.to_vec());
 
     // let account = next_account_info(account_iter)?;
     // match d.method {

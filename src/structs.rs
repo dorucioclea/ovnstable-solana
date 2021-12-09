@@ -59,7 +59,7 @@ pub struct OVNProcessor {
 }
 
 pub struct Exchange<'a> {
-    pub ovn: &'a OVNToken,
-    pub program_data: &'a ProgramData,
+    pub ovn: OVNToken,
+    pub program_data: ProgramData,
     pub account_infos: Vec<AccountInfo<'a>>,
 }
