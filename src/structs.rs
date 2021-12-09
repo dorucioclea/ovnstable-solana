@@ -10,8 +10,8 @@ pub enum Method {
     MINT = 0
 }
 
-pub trait OVNFrom<T> {
-    fn ovn_from(key: T, signer: bool, writable: bool, executable: bool) -> Self;
+pub trait ConvertProgramData<T> {
+    fn convert(&self) -> T;
 }
 
 // #[derive(BorshSerialize, BorshDeserialize, Debug)]

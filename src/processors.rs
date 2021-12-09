@@ -15,7 +15,7 @@ use solana_program::message::Message;
 use solana_program::program::invoke;
 use solana_program::program_error::{PrintProgramError, ProgramError};
 use spl_token::state::Account;
-use self::super::structs::{Exchange, Method, OVNFrom, OVNProcessor, OVNToken, ProgramData};
+use self::super::structs::{Exchange, Method, OVNProcessor, OVNToken, ProgramData};
 
 
 impl<'a> OVNProcessor {
