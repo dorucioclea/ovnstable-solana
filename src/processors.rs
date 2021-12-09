@@ -77,6 +77,9 @@ impl<'a> OVNToken {
         }
 
     }
+
+    pub fn balance(&self) {
+    }
 }
 
 impl<'a> Exchange<'a> {
@@ -93,6 +96,10 @@ impl<'a> Exchange<'a> {
 
         let sender = next_account_info(accounts_infos_iter).expect("Cant get sender");
         self.ovn.mint(sender.key, self.account_infos.as_ref(), amount);
+    }
+
+    pub fn balance(&self) {
+
     }
 
 }

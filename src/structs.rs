@@ -5,6 +5,7 @@ use solana_program::account_info::AccountInfo;
 use solana_program::pubkey::Pubkey;
 // use crate::processors::mint_contract;
 use std::convert::TryFrom;
+use std::marker::PhantomData;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub enum Method {
