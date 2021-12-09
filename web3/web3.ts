@@ -57,10 +57,10 @@ enum Method {
 
 class ProgramData {
     method: Method = Method.MINT
-    args: number = 0
+    args: any = {};
     // data: string = '';
 
-    constructor(fields: {method: Method, args: number} | undefined = undefined) {
+    constructor(fields: {method: Method, args: any} | undefined = undefined) {
         if(fields) {
             this.method = fields.method;
             this.args = fields.args;
@@ -68,8 +68,22 @@ class ProgramData {
     }
 }
 
+class MintProgramData {
+    amount: number = 0
+
+    constructor(fields: {amount: number} | undefined = undefined) {
+        if(fields) {
+            this.amount = fields.amount;
+        }
+    }
+}
+
+const MintDataSchema = new Map([
+    [MintProgramData, {kind: 'struct', fields: [['amount', 'u64']]}]
+]);
+
 const DataSchema = new Map([
-    [ProgramData, {kind: 'struct', fields: [['method', 'u8'], ['args', 'u128']]}],
+    [ProgramData, {kind: 'struct', fields: [['method', 'u8'], ['args', 'buffer']]}],
 ]);
 
 // Read program id from keypair file
@@ -180,7 +194,7 @@ export async function establishConnection(): Promise<void> {
 export async function executeProgram(): Promise<void> {
     // console.log('Saying hello to', greetedPubkey.toBase58());
     // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
-    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: 123}))
+    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: borsh.serialize(MintDataSchema, new MintProgramData({amount: 3294823980}))}))
     const instruction = new TransactionInstruction({
         keys: [{pubkey: mintPub, isSigner: false, isWritable: true},
             {pubkey: destAcc, isSigner: false, isWritable: true},

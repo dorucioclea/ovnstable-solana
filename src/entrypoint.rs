@@ -44,6 +44,7 @@ pub fn process_instruction(program_id: &Pubkey,
 ) -> ProgramResult {
     log::sol_log("HEY");
     let d: ProgramData = ProgramData::try_from_slice(&_instruction_data.borrow())?;
+    log::sol_log("program data parsed");
 
     // let program_args: u128 = d.args;
     // let account_iter = &mut accounts.iter();

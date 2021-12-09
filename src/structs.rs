@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::account_info::AccountInfo;
@@ -22,7 +23,18 @@ pub trait ConvertProgramData<T> {
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct ProgramData {
     pub method: Method,
-    pub args: u128
+    pub args: Vec<u8>
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct MintProgramData {
+    pub amount: u64
+}
+
+impl From<&ProgramData> for MintProgramData {
+    fn from(data: &ProgramData) -> Self {
+        MintProgramData::try_from_slice(&data.args.borrow()).expect("PIZDEC")
+    }
 }
 
 pub struct OVNToken {

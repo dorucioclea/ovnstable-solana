@@ -15,6 +15,7 @@ use solana_program::message::Message;
 use solana_program::program::invoke;
 use solana_program::program_error::{PrintProgramError, ProgramError};
 use spl_token::state::Account;
+use crate::structs::MintProgramData;
 use self::super::structs::{Exchange, Method, OVNProcessor, OVNToken, ProgramData};
 
 
@@ -27,8 +28,9 @@ impl<'a> OVNProcessor {
         let ovn = OVNToken::default();
         match program_data.method {
             Method::MINT => {
+                let mint_program_data: MintProgramData = MintProgramData::from(&program_data);
                 let exchange = Exchange::new(ovn, program_data, account_infos);
-                exchange.mint(3);
+                exchange.mint(mint_program_data.amount);
                 // mint_contract(account_infos, 3);
             }
         }
