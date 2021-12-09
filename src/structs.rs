@@ -23,7 +23,7 @@ pub trait ConvertProgramData<T> {
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct ProgramData {
     pub method: Method,
-    pub args: Vec<u8>
+    pub args: [u8; 1024]
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]

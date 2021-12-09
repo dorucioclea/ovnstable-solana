@@ -55,12 +55,15 @@ enum Method {
     MINT
 }
 
-class ProgramData {
+class Sendable {}
+
+class ProgramData extends Sendable {
     method: Method = Method.MINT
-    args: any = {};
+    args: Sendable = {};
     // data: string = '';
 
     constructor(fields: {method: Method, args: any} | undefined = undefined) {
+        super();
         if(fields) {
             this.method = fields.method;
             this.args = fields.args;
@@ -68,23 +71,30 @@ class ProgramData {
     }
 }
 
-class MintProgramData {
+class MintProgramData extends Sendable {
     amount: number = 0
 
     constructor(fields: {amount: number} | undefined = undefined) {
+        super();
         if(fields) {
             this.amount = fields.amount;
         }
     }
 }
 
-const MintDataSchema = new Map([
+// const MintDataSchema = new Map([
+//     [MintProgramData, {kind: 'struct', fields: [['amount', 'u64']]}]
+// ]);
+
+const DataSchema = new Map<any, any>([
+    [ProgramData, {kind: 'struct', fields: [['method', 'u8'], ['args', {kind: undefined}]]}],
     [MintProgramData, {kind: 'struct', fields: [['amount', 'u64']]}]
 ]);
 
-const DataSchema = new Map([
-    [ProgramData, {kind: 'struct', fields: [['method', 'u8'], ['args', 'buffer']]}],
-]);
+const DataParseSchema = new Map<any, any>([
+    [ProgramData, {kind: 'struct', fields: [['method', 'u8'], ['args', MintProgramData]]}],
+    [MintProgramData, {kind: 'struct', fields: [['amount', 'u64']]}]
+])
 
 // Read program id from keypair file
 async function checkProgram() {
@@ -194,7 +204,8 @@ export async function establishConnection(): Promise<void> {
 export async function executeProgram(): Promise<void> {
     // console.log('Saying hello to', greetedPubkey.toBase58());
     // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
-    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: borsh.serialize(MintDataSchema, new MintProgramData({amount: 3294823980}))}))
+    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: new MintProgramData({amount: 3294823980})}))
+    const parsed = borsh.deserialize(DataParseSchema, ProgramData, Buffer.from(data));
     const instruction = new TransactionInstruction({
         keys: [{pubkey: mintPub, isSigner: false, isWritable: true},
             {pubkey: destAcc, isSigner: false, isWritable: true},
