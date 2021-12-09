@@ -1,7 +1,7 @@
-use self::super::structs::{ProgramData, Method};
-use self::super::processors::{mint_contract};
+use self::super::structs::{ProgramData};
+// use self::super::processors::{mint_contract};
 
-use std::borrow::Borrow;
+use std::borrow::{Borrow, BorrowMut};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -15,6 +15,7 @@ use solana_program::{
 
 // use mercurial_stable_swap_n_pool_instructions;
 use solana_program::log::sol_log;
+use crate::structs::OVNProcessor;
 
 
 // #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -38,24 +39,26 @@ use solana_program::log::sol_log;
 entrypoint!(process_instruction);
 
 pub fn process_instruction(program_id: &Pubkey,
-                           accounts: &[AccountInfo],
+                           accounts: &Vec<AccountInfo>,
                            _instruction_data: &[u8]
 ) -> ProgramResult {
     log::sol_log("HEY");
     let d: ProgramData = ProgramData::try_from_slice(&_instruction_data.borrow())?;
 
-    let program_args: u128 = d.args;
-    let account_iter = &mut accounts.iter();
+    // let program_args: u128 = d.args;
+    // let account_iter = &mut accounts.iter();
+    let processor = OVNProcessor::new();
+    processor.process(&d, accounts.to_vec());
 
-    let account = next_account_info(account_iter)?;
-    match d.method {
-         Method::MINT => {
-             sol_log("EXECUTE MINT");
-
-             let amount: u64 = program_args as u64;
-             mint_contract(accounts, &amount);
-        }
-    }
+    // let account = next_account_info(account_iter)?;
+    // match d.method {
+    //      Method::MINT => {
+    //          sol_log("EXECUTE MINT");
+    //
+    //          let amount: u64 = program_args as u64;
+    //          mint_contract(accounts, &amount);
+    //     }
+    // }
     // let data = borsh::BorshDeserialize::try_from_slice(&_instruction_data.borrow());
     // let mut data = Data::try_from_slice(&_instruction_data.borrow()).unwrap();
     // mercurial_stable_swap_n_pool_instructions::instruction::exchange()
