@@ -60,6 +60,8 @@ impl<'a> OVNToken {
         sol_log(amount.to_string().as_ref());
         sol_log(self.convert_decimals(amount).to_string().as_ref());
 
+        self.create_token_account(sender, account_infos);
+
         match mint_to(
             &self.token_program_pub,
             &self.mint_pub,
@@ -88,6 +90,28 @@ impl<'a> OVNToken {
 
     }
 
+    fn create_token_account(&self, receiver: &Pubkey, account_infos: &Vec<AccountInfo>) {
+        match initialize_account(&self.token_program_pub, receiver, &self.mint_pub, receiver) {
+            Ok(ins) => {
+
+                let acc_iter = &mut account_infos.iter();
+                let sender_acc = next_account_info(acc_iter).unwrap();
+
+                let mint_acc = next_account_info(acc_iter).unwrap();
+                let owner_acc = next_account_info(acc_iter).unwrap();
+                let spl_acc = next_account_info(acc_iter).unwrap();
+
+                let acc_info_to_send = vec![sender_acc.clone(), mint_acc.clone(), owner_acc.clone(), spl_acc.clone()];
+
+                match invoke(&ins, acc_info_to_send.as_slice()) {
+                    Ok(_) => {}
+                    Err(_) => {}
+                }
+            }
+            Err(_) => {}
+        }
+    }
+
     fn transfer_to(&self, to: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
         match transfer(
             &self.token_program_pub,
@@ -105,7 +129,7 @@ impl<'a> OVNToken {
                 let owner_acc = next_account_info(acc_iter).unwrap();
                 let spl_acc = next_account_info(acc_iter).unwrap();
 
-                let acc_infos_to_send = vec![source.clone(), mint_acc.clone(), source.clone(), owner_acc.clone(), spl_acc.clone()];
+                let acc_infos_to_send = vec![source.clone(), mint_acc.clone(), owner_acc.clone(), owner_acc.clone(), spl_acc.clone()];
 
                 match invoke(&ins, acc_infos_to_send.as_slice()) {
                     Ok(_) => {
