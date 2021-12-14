@@ -28,9 +28,10 @@ impl<'a> OVNProcessor {
         let ovn = OVNToken::default();
         match program_data.method {
             Method::MINT => {
-                let mint_program_data: MintProgramData = MintProgramData::from(&program_data);
+                sol_log("MINT");
+                let mint_program_data: u64 = program_data.args.borrow().amount;
                 let exchange = Exchange::new(ovn, program_data, account_infos);
-                exchange.mint(mint_program_data.amount);
+                exchange.mint(mint_program_data);
                 // mint_contract(account_infos, 3);
             }
         }
@@ -56,6 +57,8 @@ impl<'a> OVNProcessor {
 
 impl<'a> OVNToken {
     pub fn mint(&self, sender: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
+        sol_log(amount.to_string().as_ref());
+        sol_log(self.convert_decimals(amount).to_string().as_ref());
 
         match mint_to(
             &self.token_program_pub,
@@ -63,12 +66,19 @@ impl<'a> OVNToken {
             sender,
             &self.owner_pub,
             &[],
-            (amount * self.decimals)) {
+            self.convert_decimals(amount)) {
 
 
             Ok(ins) => {
+                let acc_iter = &mut account_infos.iter();
+                let sender_acc = next_account_info(acc_iter).unwrap();
 
-                match invoke(&ins, account_infos) {
+                let mint_acc = next_account_info(acc_iter).unwrap();
+                let owner_acc = next_account_info(acc_iter).unwrap();
+                let spl_acc = next_account_info(acc_iter).unwrap();
+                let spl_mint_ai = vec![mint_acc.clone(), sender_acc.clone(), owner_acc.clone(), spl_acc.clone()];
+
+                match invoke(&ins, spl_mint_ai.as_slice()) {
                     Ok(_) => {true}
                     Err(_) => {false}
                 }
@@ -76,6 +86,10 @@ impl<'a> OVNToken {
             Err(err) => {false}
         }
 
+    }
+
+    fn convert_decimals(&self, amount: u64) -> u64 {
+        amount * (u64::pow(10, self.decimals))
     }
 
     pub fn balance(&self) {

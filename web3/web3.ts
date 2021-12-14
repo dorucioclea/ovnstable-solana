@@ -23,8 +23,8 @@ const PROGRAM_PATH = path.resolve(__dirname, '../dist/ovn');
 const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'ovn-keypair.json');
 const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'ovn.so');
 let greetedPubkey: PublicKey;
-let mintPub: PublicKey = new PublicKey("9sjFya4L53b62uY35fgE8DzqYeZhXM6JMYhJbHmt9PqJ");
-let destAcc: PublicKey = new PublicKey("2zbux95BEVcb6oCHerAEfosNeQUjZct95TuQNcySQMvL");
+let mintPub: PublicKey = new PublicKey("HeZNttoZDLD89JuWh1GVj2hyNgrAQMwfM3zTfRPH64Pn");
+let destAcc: PublicKey = new PublicKey("1469fPU1qj6SdHNMBgnDY2SEDkgvYw51z5L6kVRsrjKa");
 let ownerPub: PublicKey = new PublicKey("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR");
 let ownerSplPub: PublicKey = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 
@@ -204,11 +204,11 @@ export async function establishConnection(): Promise<void> {
 export async function executeProgram(): Promise<void> {
     // console.log('Saying hello to', greetedPubkey.toBase58());
     // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
-    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: new MintProgramData({amount: 3294823980})}))
+    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: new MintProgramData({amount: 2})}))
     const parsed = borsh.deserialize(DataParseSchema, ProgramData, Buffer.from(data));
     const instruction = new TransactionInstruction({
-        keys: [{pubkey: mintPub, isSigner: false, isWritable: true},
-            {pubkey: destAcc, isSigner: false, isWritable: true},
+        keys: [{pubkey: destAcc, isSigner: false, isWritable: true},
+            {pubkey: mintPub, isSigner: false, isWritable: true},
             {pubkey: ownerPub, isSigner: false, isWritable: false},
             {pubkey: ownerSplPub, isSigner: false, isWritable: false},
         ],

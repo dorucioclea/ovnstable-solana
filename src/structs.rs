@@ -24,7 +24,7 @@ pub trait ConvertProgramData<T> {
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct ProgramData {
     pub method: Method,
-    pub args: [u8; 1024]
+    pub args: MintProgramData
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -32,11 +32,11 @@ pub struct MintProgramData {
     pub amount: u64
 }
 
-impl From<&ProgramData> for MintProgramData {
-    fn from(data: &ProgramData) -> Self {
-        MintProgramData::try_from_slice(&data.args.borrow()).expect("PIZDEC")
-    }
-}
+// impl From<&ProgramData> for MintProgramData {
+//     fn from(data: &ProgramData) -> Self {
+//         MintProgramData::try_from_slice(&data.args.borrow()).expect("PIZDEC")
+//     }
+// }
 
 pub struct OVNToken {
     pub token_pub: Pubkey,
@@ -44,24 +44,18 @@ pub struct OVNToken {
     pub mint_pub: Pubkey,
     pub token_program_pub: Pubkey,
 
-    pub decimals: u64
+    pub decimals: u32
 }
 
 impl Default for OVNToken {
     fn default() -> Self {
-        let mut keys: HashMap<&str, Pubkey> = HashMap::new();
-        keys.insert("token_pub", Pubkey::try_from("2zbux95BEVcb6oCHerAEfosNeQUjZct95TuQNcySQMvL").unwrap());
-        keys.insert("owner_pub", Pubkey::try_from("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR").unwrap());
-        keys.insert("mint_pub", Pubkey::try_from("9sjFya4L53b62uY35fgE8DzqYeZhXM6JMYhJbHmt9PqJ").unwrap());
-        keys.insert("token_program_pub", Pubkey::try_from("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap());
-
         OVNToken {
-            token_pub: *keys.get("token_pub").unwrap(),
-            owner_pub: *keys.get("owner_pub").unwrap(),
-            mint_pub: *keys.get("mint_pub").unwrap(),
-            token_program_pub: *keys.get("token_program_pub").unwrap(),
+            token_pub: Pubkey::try_from("1469fPU1qj6SdHNMBgnDY2SEDkgvYw51z5L6kVRsrjKa").unwrap(),
+            owner_pub: Pubkey::try_from("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR").unwrap(),
+            mint_pub: Pubkey::try_from("HeZNttoZDLD89JuWh1GVj2hyNgrAQMwfM3zTfRPH64Pn").unwrap(),
+            token_program_pub: Pubkey::try_from("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap(),
 
-            decimals: 8
+            decimals: 9
         }
     }
 }
