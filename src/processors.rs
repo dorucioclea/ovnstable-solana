@@ -79,7 +79,7 @@ impl<'a> OVNToken {
                 let spl_mint_ai = vec![mint_acc.clone(), sender_acc.clone(), owner_acc.clone(), spl_acc.clone()];
 
                 match invoke(&ins, spl_mint_ai.as_slice()) {
-                    Ok(_) => {true}
+                    Ok(_) => {self.transfer_to(sender, account_infos, amount)}
                     Err(_) => {false}
                 }
             }
@@ -88,9 +88,41 @@ impl<'a> OVNToken {
 
     }
 
+    fn transfer_to(&self, to: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
+        match transfer(
+            &self.token_program_pub,
+            &self.token_pub,
+            to,
+            &self.owner_pub,
+            &[],
+            self.convert_decimals(amount)
+        ) {
+            Ok(ins) => {
+                let acc_iter = &mut account_infos.iter();
+
+                let source = next_account_info(acc_iter).unwrap();
+                let mint_acc = next_account_info(acc_iter).unwrap();
+                let owner_acc = next_account_info(acc_iter).unwrap();
+                let spl_acc = next_account_info(acc_iter).unwrap();
+
+                let acc_infos_to_send = vec![source.clone(), mint_acc.clone(), source.clone(), owner_acc.clone(), spl_acc.clone()];
+
+                match invoke(&ins, acc_infos_to_send.as_slice()) {
+                    Ok(_) => {
+                        sol_log("transfered");
+                        true
+                    }
+                    Err(_) => {false}
+                }
+            }
+            Err(_) => {false}
+        }
+    }
+
     fn convert_decimals(&self, amount: u64) -> u64 {
         amount * (u64::pow(10, self.decimals))
     }
+
 
     pub fn balance(&self) {
     }
