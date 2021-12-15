@@ -8,7 +8,7 @@ import {
     Transaction,
     sendAndConfirmTransaction,
 } from '@solana/web3.js';
-import {createKeypairFromFile, getPayer, getRpcUrl} from "./utils";
+import {createKeypairFromFile, findAssociatedTokenAddress, getPayer, getRpcUrl} from "./utils";
 import fs from "mz/fs";
 import path from "path";
 import * as borsh from 'borsh';
@@ -31,6 +31,7 @@ let tokenAddr: PublicKey = new PublicKey("AV8U839Ysa7WnVzk7BHQTJMNN3eLSf6qDazZGU
 let destAcc: PublicKey = new PublicKey("CZ74qYyBUVNJUMHnD4UQVw75TTaXctTFaUuFM84dZY85");
 let ownerPub: PublicKey = new PublicKey("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR");
 let ownerSplPub: PublicKey = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+let associatedTokenProgramPub = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 let sysVar: PublicKey = new PublicKey("SysvarRent111111111111111111111111111111111")
 let sysProgPub: PublicKey = new PublicKey("11111111111111111111111111111111")
 
@@ -210,8 +211,10 @@ export async function establishConnection(): Promise<void> {
 export async function executeProgram(): Promise<void> {
     // console.log('Saying hello to', greetedPubkey.toBase58());
     // const data: Buffer = Buffer.from("dsklgfdklgjdfg");
-    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: new MintProgramData({amount: 2})}))
+    const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: new MintProgramData({amount: 12})}))
     const parsed = borsh.deserialize(DataParseSchema, ProgramData, Buffer.from(data));
+    let assoc: PublicKey = await findAssociatedTokenAddress(destAcc, mintPub);
+
     const instruction = new TransactionInstruction({
         keys: [{pubkey: destAcc, isSigner: false, isWritable: true},
             {pubkey: tokenAddr, isSigner: false, isWritable: true},
@@ -220,6 +223,8 @@ export async function executeProgram(): Promise<void> {
             {pubkey: ownerSplPub, isSigner: false, isWritable: false},
             {pubkey: sysVar, isSigner: false, isWritable: false},
             {pubkey: sysProgPub, isSigner: false, isWritable: true},
+            {pubkey: assoc, isSigner: false, isWritable: true},
+            {pubkey: associatedTokenProgramPub, isSigner: false, isWritable: false},
         ],
         programId,
         data: Buffer.from(data)

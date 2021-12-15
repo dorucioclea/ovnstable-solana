@@ -6,7 +6,10 @@ import os from 'os';
 import fs from 'mz/fs';
 import path from 'path';
 import yaml from 'yaml';
-import {Keypair} from '@solana/web3.js';
+import {Keypair, PublicKey} from '@solana/web3.js';
+
+const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 
 /**
  * @private
@@ -65,4 +68,18 @@ export async function createKeypairFromFile(
   const secretKeyString = await fs.readFile(filePath, {encoding: 'utf8'});
   const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
   return Keypair.fromSecretKey(secretKey);
+}
+
+export async function findAssociatedTokenAddress(
+    walletAddress: PublicKey,
+    tokenMintAddress: PublicKey
+): Promise<PublicKey> {
+  return (await PublicKey.findProgramAddress(
+      [
+        walletAddress.toBuffer(),
+        TOKEN_PROGRAM_ID.toBuffer(),
+        tokenMintAddress.toBuffer(),
+      ],
+      SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID
+  ))[0];
 }

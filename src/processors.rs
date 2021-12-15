@@ -1,23 +1,23 @@
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::ops::DerefMut;
+use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::slice::Iter;
 use solana_program::{pubkey::Pubkey, account_info::AccountInfo};
 use solana_program::account_info::next_account_info;
 use solana_program::log::sol_log;
-use spl_token::instruction::{mint_to, initialize_mint, mint_to_checked, initialize_account, transfer, initialize_account2, approve};
+use spl_token::instruction::{mint_to, initialize_mint, mint_to_checked, initialize_account, transfer, initialize_account2, approve, sync_native};
 use spl_token::processor::Processor;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::instruction::{AccountMeta, Instruction};
 use solana_program::message::Message;
-use solana_program::program::{invoke, invoke_unchecked};
+use solana_program::program::{get_return_data, invoke, invoke_unchecked};
 use solana_program::program_error::{PrintProgramError, ProgramError};
 use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
-use spl_token::state::Account;
 use crate::structs::MintProgramData;
 use self::super::structs::{Exchange, Method, OVNProcessor, OVNToken, ProgramData};
+use std::convert::TryFrom;
 
 
 impl<'a> OVNProcessor {
@@ -57,7 +57,7 @@ impl<'a> OVNProcessor {
 // }
 
 impl<'a> OVNToken {
-    pub fn mint(&self, receiver: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
+    pub fn mint(&self, receiver: &Pubkey, account_infos: &mut Vec<AccountInfo>, amount: u64) -> bool {
         sol_log(amount.to_string().as_ref());
         sol_log(self.convert_decimals(amount).to_string().as_ref());
 
@@ -65,6 +65,9 @@ impl<'a> OVNToken {
         //     Ok(_) => {true}
         //     Err(_) => {false}
         // };
+        // let mut lm = account_infos[0].lamports.try_borrow().ok().unwrap();
+        // sol_log("lamports");
+        // sol_log(lm.to_string().as_str());
 
         match mint_to(
             &self.token_program_pub,
@@ -117,66 +120,69 @@ impl<'a> OVNToken {
         }
 
 
-        // let ins = create_associated_token_account(owner_acc.key, receiver_acc.key, &self.mint_pub);
+        let ins = create_associated_token_account(owner_acc.key, receiver_acc.key, &self.mint_pub);
         //
         // //
         // //
         // //
-        // let ac_to_send = vec![owner_acc.clone(), receiver_acc.clone(), token_acc.clone(), mint_acc.clone(), sysprog_acc.clone(), spl_acc.clone()];
-        // sol_log("start invoke create associated acc");
-        // match invoke(&ins, ac_to_send.as_slice()) {
-        //     Ok(_) => {sol_log("EEEEEE");}
-        //     Err(_) => {}
-        // }
-
-        match initialize_account(&self.token_program_pub, &self.token_pub, &self.mint_pub, receiver_pub) {
-            Ok(ins) => {
-                sol_log("Create account");
-
-                // let acc_iter = &mut account_infos.iter();
-
-                // let receiver_acc = next_account_info(acc_iter).unwrap();
-                // sol_log(receiver_acc.key.to_string().as_ref());
-                //
-                // let token_acc = next_account_info(acc_iter).unwrap();
-                // let mint_acc = next_account_info(acc_iter).unwrap();
-                // let owner_acc = next_account_info(acc_iter).unwrap();
-                // let spl_acc = next_account_info(acc_iter).unwrap();
-                // let sysvar_acc = next_account_info(acc_iter).unwrap();
-
-                let acc_info_to_send = vec![receiver_acc.clone(), mint_acc.clone(), token_acc.clone(), sysvar_acc.clone(), owner_acc.clone()];
-
-                match invoke(&ins, acc_info_to_send.as_slice()) {
-                    Ok(_) => {Ok(())}
-                    Err(_) => {Err(ProgramError::Custom(101))}
-                }
-            }
+        let ac_to_send = vec![owner_acc.clone(), token_acc.clone(), receiver_acc.clone(), mint_acc.clone(), sysprog_acc.clone(), spl_acc.clone(), sysvar_acc.clone()];
+        sol_log("start invoke create associated acc");
+        match invoke(&ins, ac_to_send.as_slice()) {
+            Ok(_) => {sol_log("EEEEEE"); Ok(())}
             Err(_) => {Err(ProgramError::Custom(101))}
         }
+
+        // match initialize_account(&self.token_program_pub, receiver_pub, &self.mint_pub, receiver_pub) {
+        //     Ok(ins) => {
+        //         sol_log("Create account");
+        //
+        //         // let acc_iter = &mut account_infos.iter();
+        //
+        //         // let receiver_acc = next_account_info(acc_iter).unwrap();
+        //         // sol_log(receiver_acc.key.to_string().as_ref());
+        //         //
+        //         // let token_acc = next_account_info(acc_iter).unwrap();
+        //         // let mint_acc = next_account_info(acc_iter).unwrap();
+        //         // let owner_acc = next_account_info(acc_iter).unwrap();
+        //         // let spl_acc = next_account_info(acc_iter).unwrap();
+        //         // let sysvar_acc = next_account_info(acc_iter).unwrap();
+        //
+        //         let acc_info_to_send = vec![receiver_acc.clone(), mint_acc.clone(), owner_acc.clone(), sysvar_acc.clone(), owner_acc.clone()];
+        //
+        //         match invoke(&ins, acc_info_to_send.as_slice()) {
+        //             Ok(_) => {Ok(())}
+        //             Err(_) => {Err(ProgramError::Custom(101))}
+        //         }
+        //     }
+        //     Err(_) => {Err(ProgramError::Custom(101))}
+        // }
     }
 
     fn transfer_to(&self, to: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
+        let acc_iter = &mut account_infos.iter();
+
+        let receiver_acc = next_account_info(acc_iter).unwrap();
+        let token_acc = next_account_info(acc_iter).unwrap();
+        let mint_acc = next_account_info(acc_iter).unwrap();
+        let owner_acc = next_account_info(acc_iter).unwrap();
+        let spl_acc = next_account_info(acc_iter).unwrap();
+        let sysvar_acc = next_account_info(acc_iter).unwrap();
+        let sysprog_acc = next_account_info(acc_iter).unwrap();
+        let associated_acc = next_account_info(acc_iter).unwrap();
+        let associated_program_acc = next_account_info(acc_iter).unwrap();
+
         match transfer(
             &self.token_program_pub,
-            &self.mint_pub,
-            to,
+            &self.token_pub,
+            associated_acc.key,
             &self.owner_pub,
             &[],
             self.convert_decimals(amount)
         ) {
             Ok(ins) => {
 
-                let acc_iter = &mut account_infos.iter();
 
-                let receiver_acc = next_account_info(acc_iter).unwrap();
-                let token_acc = next_account_info(acc_iter).unwrap();
-                let mint_acc = next_account_info(acc_iter).unwrap();
-                let owner_acc = next_account_info(acc_iter).unwrap();
-                let spl_acc = next_account_info(acc_iter).unwrap();
-                let sysvar_acc = next_account_info(acc_iter).unwrap();
-                let sysprog_acc = next_account_info(acc_iter).unwrap();
-
-                let acc_infos_to_send = vec![mint_acc.clone(), receiver_acc.clone(), owner_acc.clone()];
+                let acc_infos_to_send = vec![token_acc.clone(), associated_acc.clone(), owner_acc.clone()];
 
                 match invoke_unchecked(&ins, acc_infos_to_send.as_slice()) {
                     Ok(_) => {
@@ -195,8 +201,18 @@ impl<'a> OVNToken {
     }
 
 
-    pub fn balance(&self) {
-
+    pub fn balance(&self, acc: &Pubkey, account_infos: &Vec<AccountInfo>) {
+        match sync_native(&self.token_program_pub, acc) {
+            Ok(ins) => {
+                match invoke(&ins, account_infos) {
+                    Ok(_) => {
+                        sol_log("success")
+                    }
+                    Err(_) => {}
+                }
+            }
+            Err(_) => {}
+        }
     }
 }
 
@@ -213,7 +229,7 @@ impl<'a> Exchange<'a> {
         let accounts_infos_iter = &mut self.account_infos.iter();
 
         let receiver = next_account_info(accounts_infos_iter).expect("Cant get sender");
-        self.ovn.mint(receiver.key, self.account_infos.as_ref(), amount);
+        self.ovn.mint(receiver.key, &mut self.account_infos.clone(), amount);
     }
 
     pub fn balance(&self) {
