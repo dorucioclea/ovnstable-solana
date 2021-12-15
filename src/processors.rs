@@ -18,8 +18,10 @@ use spl_associated_token_account::{create_associated_token_account, get_associat
 use crate::structs::{AccountTokenData, MintProgramData};
 use self::super::structs::{Exchange, Method, OVNProcessor, OVNToken, ProgramData};
 use std::convert::TryFrom;
+use std::mem;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::borsh::try_from_slice_unchecked;
+use solana_program::system_instruction::allocate;
 
 
 impl<'a> OVNProcessor {
@@ -188,11 +190,41 @@ impl<'a> OVNToken {
 
                 match invoke_unchecked(&ins, acc_infos_to_send.as_slice()) {
                     Ok(_) => {
+
+                        // match self.allocate_space(receiver_acc.key, receiver_acc, mem::size_of::<AccountTokenData>().into()) {
+                        //     Ok(_) => {
+                        //
+                        //     }
+                        //     Err(_) => {}
+                        // }
+
                         sol_log("transfered");
+                        let mut ad;
                         // let mut a: AccountTokenData = try_from_slice_unchecked(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
-                        let mut a: AccountTokenData = AccountTokenData::try_from_slice(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
-                        a.token_amount += amount;
-                        a.serialize(&mut &mut receiver_acc.data.try_borrow_mut().ok().unwrap()[..]).ok().unwrap();
+                        let a = AccountTokenData::try_from_slice(&receiver_acc.data.try_borrow().ok().unwrap());
+                        match a {
+                            Ok(adt) => {
+                                sol_log("ADT");
+                                sol_log(adt.token_amount.to_string().as_str());
+                                ad = adt;
+                            },
+                            Err(_) => {
+                                sol_log("ERR");
+                                ad = AccountTokenData {token_amount: 0};
+                            }
+                        }
+                        ad.token_amount += amount;
+                        sol_log(ad.token_amount.to_string().as_str());
+
+                        match self.allocate_space(receiver_acc, u64::try_from(mem::size_of::<AccountTokenData>()).unwrap()) {
+                            Ok(_) => {
+                                ad.serialize(&mut &mut receiver_acc.data.try_borrow_mut().ok().unwrap()[..]).unwrap();
+                            }
+                            Err(_) => {}
+                        }
+
+
+                        // a.token_amount += amount;
                         // let a = AccountTokenData::try_from_slice_unchecked(&associated_acc.data.try_borrow().unwrap()).unwrap();
                         // match associated_acc.data.try_borrow() {
                         //     Ok(b) => {
@@ -220,6 +252,12 @@ impl<'a> OVNToken {
             }
             Err(_) => {false}
         }
+    }
+
+    fn allocate_space(&self, acc: &AccountInfo, size: u64) -> ProgramResult {
+        let ins = allocate(acc.key, size);
+        let ai = vec![acc.clone()];
+        invoke_unchecked(&ins, ai.as_slice())
     }
 
     fn convert_decimals(&self, amount: u64) -> u64 {
