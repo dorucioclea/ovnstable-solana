@@ -43,6 +43,7 @@ pub struct OVNToken {
     pub owner_pub: Pubkey,
     pub mint_pub: Pubkey,
     pub token_program_pub: Pubkey,
+    sysvar_pub: Pubkey,
 
     pub decimals: u32
 }
@@ -50,10 +51,11 @@ pub struct OVNToken {
 impl Default for OVNToken {
     fn default() -> Self {
         OVNToken {
-            token_pub: Pubkey::try_from("1469fPU1qj6SdHNMBgnDY2SEDkgvYw51z5L6kVRsrjKa").unwrap(),
+            token_pub: Pubkey::try_from("AV8U839Ysa7WnVzk7BHQTJMNN3eLSf6qDazZGUdCpP4G").unwrap(),
             owner_pub: Pubkey::try_from("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR").unwrap(),
-            mint_pub: Pubkey::try_from("HeZNttoZDLD89JuWh1GVj2hyNgrAQMwfM3zTfRPH64Pn").unwrap(),
+            mint_pub: Pubkey::try_from("4JapSRqYT3K3BQkgqqRrGnWEXtpNb9p5MoWj8EmTyNha").unwrap(),
             token_program_pub: Pubkey::try_from("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap(),
+            sysvar_pub: Pubkey::try_from("SysvarRent111111111111111111111111111111111").unwrap(),
 
             decimals: 9
         }

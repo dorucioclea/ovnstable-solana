@@ -14,6 +14,9 @@ import path from "path";
 import * as borsh from 'borsh';
 
 
+const bs58 = require('bs58')
+
+
 
 let connection: Connection;
 let programId: PublicKey;
@@ -23,10 +26,13 @@ const PROGRAM_PATH = path.resolve(__dirname, '../dist/ovn');
 const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'ovn-keypair.json');
 const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'ovn.so');
 let greetedPubkey: PublicKey;
-let mintPub: PublicKey = new PublicKey("HeZNttoZDLD89JuWh1GVj2hyNgrAQMwfM3zTfRPH64Pn");
-let destAcc: PublicKey = new PublicKey("1469fPU1qj6SdHNMBgnDY2SEDkgvYw51z5L6kVRsrjKa");
+let mintPub: PublicKey = new PublicKey("4JapSRqYT3K3BQkgqqRrGnWEXtpNb9p5MoWj8EmTyNha");
+let tokenAddr: PublicKey = new PublicKey("AV8U839Ysa7WnVzk7BHQTJMNN3eLSf6qDazZGUdCpP4G")
+let destAcc: PublicKey = new PublicKey("CZ74qYyBUVNJUMHnD4UQVw75TTaXctTFaUuFM84dZY85");
 let ownerPub: PublicKey = new PublicKey("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR");
 let ownerSplPub: PublicKey = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+let sysVar: PublicKey = new PublicKey("SysvarRent111111111111111111111111111111111")
+let sysProgPub: PublicKey = new PublicKey("11111111111111111111111111111111")
 
 
 class GreetingAccount {
@@ -208,9 +214,12 @@ export async function executeProgram(): Promise<void> {
     const parsed = borsh.deserialize(DataParseSchema, ProgramData, Buffer.from(data));
     const instruction = new TransactionInstruction({
         keys: [{pubkey: destAcc, isSigner: false, isWritable: true},
+            {pubkey: tokenAddr, isSigner: false, isWritable: true},
             {pubkey: mintPub, isSigner: false, isWritable: true},
             {pubkey: ownerPub, isSigner: false, isWritable: false},
             {pubkey: ownerSplPub, isSigner: false, isWritable: false},
+            {pubkey: sysVar, isSigner: false, isWritable: false},
+            {pubkey: sysProgPub, isSigner: false, isWritable: true},
         ],
         programId,
         data: Buffer.from(data)
@@ -224,6 +233,10 @@ export async function executeProgram(): Promise<void> {
 }
 
 async function main() {
+    let kp = createKeypairFromFile("/Users/evgenijzaharov/CLionProjects/ovn_solana_rust/f.json").then(value => {
+        console.log(bs58.encode(value.secretKey));
+    })
+
     await establishConnection();
     await establishPayer();
     await checkProgram();
