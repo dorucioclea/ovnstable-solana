@@ -48,6 +48,11 @@ pub struct OVNToken {
     pub decimals: u32
 }
 
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct AccountTokenData {
+    pub token_amount: u64
+}
+
 impl Default for OVNToken {
     fn default() -> Self {
         OVNToken {

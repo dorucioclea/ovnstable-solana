@@ -1,5 +1,5 @@
 use std::borrow::{Borrow, BorrowMut};
-use std::cell::RefCell;
+use std::cell::{BorrowError, Ref, RefCell};
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
@@ -15,9 +15,11 @@ use solana_program::message::Message;
 use solana_program::program::{get_return_data, invoke, invoke_unchecked};
 use solana_program::program_error::{PrintProgramError, ProgramError};
 use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
-use crate::structs::MintProgramData;
+use crate::structs::{AccountTokenData, MintProgramData};
 use self::super::structs::{Exchange, Method, OVNProcessor, OVNToken, ProgramData};
 use std::convert::TryFrom;
+use borsh::{BorshDeserialize, BorshSerialize};
+use solana_program::borsh::try_from_slice_unchecked;
 
 
 impl<'a> OVNProcessor {
@@ -161,14 +163,14 @@ impl<'a> OVNToken {
     fn transfer_to(&self, to: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
         let acc_iter = &mut account_infos.iter();
 
-        let receiver_acc = next_account_info(acc_iter).unwrap();
+        let mut receiver_acc = next_account_info(acc_iter).unwrap();
         let token_acc = next_account_info(acc_iter).unwrap();
         let mint_acc = next_account_info(acc_iter).unwrap();
         let owner_acc = next_account_info(acc_iter).unwrap();
         let spl_acc = next_account_info(acc_iter).unwrap();
         let sysvar_acc = next_account_info(acc_iter).unwrap();
         let sysprog_acc = next_account_info(acc_iter).unwrap();
-        let associated_acc = next_account_info(acc_iter).unwrap();
+        let mut associated_acc = next_account_info(acc_iter).unwrap();
         let associated_program_acc = next_account_info(acc_iter).unwrap();
 
         match transfer(
@@ -187,6 +189,30 @@ impl<'a> OVNToken {
                 match invoke_unchecked(&ins, acc_infos_to_send.as_slice()) {
                     Ok(_) => {
                         sol_log("transfered");
+                        // let mut a: AccountTokenData = try_from_slice_unchecked(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
+                        let mut a: AccountTokenData = AccountTokenData::try_from_slice(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
+                        a.token_amount += amount;
+                        a.serialize(&mut &mut receiver_acc.data.try_borrow_mut().ok().unwrap()[..]).ok().unwrap();
+                        // let a = AccountTokenData::try_from_slice_unchecked(&associated_acc.data.try_borrow().unwrap()).unwrap();
+                        // match associated_acc.data.try_borrow() {
+                        //     Ok(b) => {
+                        //         let mut a = AccountTokenData { token_amount: amount };
+                        //         a.serialize(&mut &mut associated_acc.data.borrow_mut());
+                        //         let mut a = AccountTokenData::try_from_slice(&b.da).unwrap();
+                        //         a.token_amount = amount;
+                        //         a.serialize(&mut &mut associated_acc.try_borrow_mut_data().ok().unwrap()[..]);
+                            // }
+                            // Err(_) => {
+                            //     let mut a = AccountTokenData { token_amount: amount };
+                            //     a.serialize(&mut &mut associated_acc.try_borrow_mut_data().ok().unwrap()[..]);
+                            // }
+                        // };
+                        //
+                        // ad.token_amount = amount;
+                        // ad.serialize(&mut &mut associated_acc.data.borrow_mut()[..]);
+
+                        // associated_program_acc.data
+
                         true
                     }
                     Err(_) => {sol_log("NOT transfered"); false}
