@@ -136,30 +136,6 @@ impl<'a> OVNToken {
             Err(_) => {Err(ProgramError::Custom(101))}
         }
 
-        // match initialize_account(&self.token_program_pub, receiver_pub, &self.mint_pub, receiver_pub) {
-        //     Ok(ins) => {
-        //         sol_log("Create account");
-        //
-        //         // let acc_iter = &mut account_infos.iter();
-        //
-        //         // let receiver_acc = next_account_info(acc_iter).unwrap();
-        //         // sol_log(receiver_acc.key.to_string().as_ref());
-        //         //
-        //         // let token_acc = next_account_info(acc_iter).unwrap();
-        //         // let mint_acc = next_account_info(acc_iter).unwrap();
-        //         // let owner_acc = next_account_info(acc_iter).unwrap();
-        //         // let spl_acc = next_account_info(acc_iter).unwrap();
-        //         // let sysvar_acc = next_account_info(acc_iter).unwrap();
-        //
-        //         let acc_info_to_send = vec![receiver_acc.clone(), mint_acc.clone(), owner_acc.clone(), sysvar_acc.clone(), owner_acc.clone()];
-        //
-        //         match invoke(&ins, acc_info_to_send.as_slice()) {
-        //             Ok(_) => {Ok(())}
-        //             Err(_) => {Err(ProgramError::Custom(101))}
-        //         }
-        //     }
-        //     Err(_) => {Err(ProgramError::Custom(101))}
-        // }
     }
 
     fn transfer_to(&self, to: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
@@ -190,13 +166,6 @@ impl<'a> OVNToken {
 
                 match invoke_unchecked(&ins, acc_infos_to_send.as_slice()) {
                     Ok(_) => {
-
-                        // match self.allocate_space(receiver_acc.key, receiver_acc, mem::size_of::<AccountTokenData>().into()) {
-                        //     Ok(_) => {
-                        //
-                        //     }
-                        //     Err(_) => {}
-                        // }
 
                         sol_log("transfered");
                         let mut ad;
@@ -231,29 +200,6 @@ impl<'a> OVNToken {
                             }
                             Err(_) => {}
                         }
-
-
-                        // a.token_amount += amount;
-                        // let a = AccountTokenData::try_from_slice_unchecked(&associated_acc.data.try_borrow().unwrap()).unwrap();
-                        // match associated_acc.data.try_borrow() {
-                        //     Ok(b) => {
-                        //         let mut a = AccountTokenData { token_amount: amount };
-                        //         a.serialize(&mut &mut associated_acc.data.borrow_mut());
-                        //         let mut a = AccountTokenData::try_from_slice(&b.da).unwrap();
-                        //         a.token_amount = amount;
-                        //         a.serialize(&mut &mut associated_acc.try_borrow_mut_data().ok().unwrap()[..]);
-                            // }
-                            // Err(_) => {
-                            //     let mut a = AccountTokenData { token_amount: amount };
-                            //     a.serialize(&mut &mut associated_acc.try_borrow_mut_data().ok().unwrap()[..]);
-                            // }
-                        // };
-                        //
-                        // ad.token_amount = amount;
-                        // ad.serialize(&mut &mut associated_acc.data.borrow_mut()[..]);
-
-                        // associated_program_acc.data
-
                         true
                     }
                     Err(_) => {sol_log("NOT transfered"); false}
@@ -306,7 +252,13 @@ impl<'a> Exchange<'a> {
     }
 
     pub fn balance(&self) {
+        let acc_iter = &mut self.account_infos.iter();
 
+        let mut receiver_acc = next_account_info(acc_iter).unwrap();
+
+        let acc_token_data: AccountTokenData = AccountTokenData::try_from_slice(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
+        sol_log("account balance");
+        sol_log(acc_token_data.token_amount.to_string().as_str());
     }
 
 }
