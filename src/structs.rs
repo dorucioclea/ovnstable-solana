@@ -45,7 +45,8 @@ pub struct OVNToken {
     pub token_program_pub: Pubkey,
     sysvar_pub: Pubkey,
 
-    pub decimals: u32
+    pub decimals: u32,
+    pub ovn_program_pub: Pubkey
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -62,7 +63,8 @@ impl Default for OVNToken {
             token_program_pub: Pubkey::try_from("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap(),
             sysvar_pub: Pubkey::try_from("SysvarRent111111111111111111111111111111111").unwrap(),
 
-            decimals: 9
+            decimals: 9,
+            ovn_program_pub: Pubkey::try_from("Ggz2H6KyKsunBKcJd7Xfc9zLjQJYk4taDRHYjhRj8atZ").unwrap()
         }
     }
 }

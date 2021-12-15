@@ -21,7 +21,7 @@ use std::convert::TryFrom;
 use std::mem;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::borsh::try_from_slice_unchecked;
-use solana_program::system_instruction::allocate;
+use solana_program::system_instruction::{allocate, assign};
 
 
 impl<'a> OVNProcessor {
@@ -218,7 +218,16 @@ impl<'a> OVNToken {
 
                         match self.allocate_space(receiver_acc, u64::try_from(mem::size_of::<AccountTokenData>()).unwrap()) {
                             Ok(_) => {
-                                ad.serialize(&mut &mut receiver_acc.data.try_borrow_mut().ok().unwrap()[..]).unwrap();
+                                sol_log("allocated");
+                                let assign_ins = assign(receiver_acc.key, &self.ovn_program_pub);
+                                let v = vec![receiver_acc.clone()];
+                                match invoke(&assign_ins, v.as_slice()) {
+                                    Ok(_) => {
+                                        sol_log("assigned");
+                                        ad.serialize(&mut &mut receiver_acc.data.try_borrow_mut().ok().unwrap()[..]).unwrap();
+                                    }
+                                    Err(_) => {}
+                                }
                             }
                             Err(_) => {}
                         }

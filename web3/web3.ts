@@ -215,6 +215,8 @@ export async function executeProgram(): Promise<void> {
     const parsed = borsh.deserialize(DataParseSchema, ProgramData, Buffer.from(data));
     let assoc: PublicKey = await findAssociatedTokenAddress(destAcc, mintPub);
 
+    let destAccKeyPair: Keypair = await createKeypairFromFile("/Users/evgenijzaharov/CLionProjects/ovn_solana_rust/f.json");
+
     const instruction = new TransactionInstruction({
         keys: [{pubkey: destAcc, isSigner: false, isWritable: true},
             {pubkey: tokenAddr, isSigner: false, isWritable: true},
@@ -233,7 +235,7 @@ export async function executeProgram(): Promise<void> {
     await sendAndConfirmTransaction(
         connection,
         new Transaction().add(instruction),
-        [payer],
+        [payer, destAccKeyPair],
     );
 }
 
