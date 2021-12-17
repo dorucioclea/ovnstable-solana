@@ -26,10 +26,10 @@ const PROGRAM_PATH = path.resolve(__dirname, '../dist/ovn');
 const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'ovn-keypair.json');
 const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'ovn.so');
 let greetedPubkey: PublicKey;
-let mintPub: PublicKey = new PublicKey("4JapSRqYT3K3BQkgqqRrGnWEXtpNb9p5MoWj8EmTyNha");
-let tokenAddr: PublicKey = new PublicKey("AV8U839Ysa7WnVzk7BHQTJMNN3eLSf6qDazZGUdCpP4G")
-let destAcc: PublicKey = new PublicKey("CZ74qYyBUVNJUMHnD4UQVw75TTaXctTFaUuFM84dZY85");
-let ownerPub: PublicKey = new PublicKey("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR");
+let mintPub: PublicKey = new PublicKey("BKhR2CPsv11T59jKJS9bKBp4er4N9F8hdRGhBHw6Aqey");
+let tokenAddr: PublicKey = new PublicKey("CFtGW5J3wV42kDLAAeA25i1PeyX7XTZK6uGga9DmkjH6")
+let destAcc: PublicKey = new PublicKey("4ubrVvb1dtUH3XkHucxLhPCRneSsRYjXTeAJZ2Pvyr4m");
+let ownerPub: PublicKey = new PublicKey("2j6W2fSrFaNM7UtaBFsjM6qFg3p1cXstPYDBe2RfyoTm");
 let ownerSplPub: PublicKey = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 let associatedTokenProgramPub = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 let sysVar: PublicKey = new PublicKey("SysvarRent111111111111111111111111111111111")
@@ -214,6 +214,7 @@ export async function executeProgram(): Promise<void> {
     const data = borsh.serialize(DataSchema, new ProgramData({method: 0, args: new MintProgramData({amount: 12})}))
     const parsed = borsh.deserialize(DataParseSchema, ProgramData, Buffer.from(data));
     let assoc: PublicKey = await findAssociatedTokenAddress(destAcc, mintPub);
+    console.log('associated address '+ assoc.toString());
 
     let destAccKeyPair: Keypair = await createKeypairFromFile("/Users/evgenijzaharov/CLionProjects/ovn_solana_rust/f.json");
 
@@ -235,7 +236,7 @@ export async function executeProgram(): Promise<void> {
     await sendAndConfirmTransaction(
         connection,
         new Transaction().add(instruction),
-        [payer, destAccKeyPair],
+        [payer],
     );
 }
 

@@ -16,10 +16,6 @@ pub trait ConvertProgramData<T> {
     fn convert(&self) -> T;
 }
 
-// #[derive(BorshSerialize, BorshDeserialize, Debug)]
-// pub struct ProgramArgument {
-//     pub value: u64
-// }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct ProgramData {
@@ -31,12 +27,6 @@ pub struct ProgramData {
 pub struct MintProgramData {
     pub amount: u64
 }
-
-// impl From<&ProgramData> for MintProgramData {
-//     fn from(data: &ProgramData) -> Self {
-//         MintProgramData::try_from_slice(&data.args.borrow()).expect("PIZDEC")
-//     }
-// }
 
 pub struct OVNToken {
     pub token_pub: Pubkey,
@@ -57,9 +47,9 @@ pub struct AccountTokenData {
 impl Default for OVNToken {
     fn default() -> Self {
         OVNToken {
-            token_pub: Pubkey::try_from("AV8U839Ysa7WnVzk7BHQTJMNN3eLSf6qDazZGUdCpP4G").unwrap(),
-            owner_pub: Pubkey::try_from("5aeAsopdEKRXXiKVn52iRRA1x3oXiaU1qyJEMzZ8g9YR").unwrap(),
-            mint_pub: Pubkey::try_from("4JapSRqYT3K3BQkgqqRrGnWEXtpNb9p5MoWj8EmTyNha").unwrap(),
+            token_pub: Pubkey::try_from("CFtGW5J3wV42kDLAAeA25i1PeyX7XTZK6uGga9DmkjH6").unwrap(),
+            owner_pub: Pubkey::try_from("2j6W2fSrFaNM7UtaBFsjM6qFg3p1cXstPYDBe2RfyoTm").unwrap(),
+            mint_pub: Pubkey::try_from("BKhR2CPsv11T59jKJS9bKBp4er4N9F8hdRGhBHw6Aqey").unwrap(),
             token_program_pub: Pubkey::try_from("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap(),
             sysvar_pub: Pubkey::try_from("SysvarRent111111111111111111111111111111111").unwrap(),
 

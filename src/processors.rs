@@ -141,7 +141,7 @@ impl<'a> OVNToken {
     fn transfer_to(&self, to: &Pubkey, account_infos: &Vec<AccountInfo>, amount: u64) -> bool {
         let acc_iter = &mut account_infos.iter();
 
-        let mut receiver_acc = next_account_info(acc_iter).unwrap();
+        let receiver_acc = next_account_info(acc_iter).unwrap();
         let token_acc = next_account_info(acc_iter).unwrap();
         let mint_acc = next_account_info(acc_iter).unwrap();
         let owner_acc = next_account_info(acc_iter).unwrap();
@@ -168,38 +168,6 @@ impl<'a> OVNToken {
                     Ok(_) => {
 
                         sol_log("transfered");
-                        let mut ad;
-                        // let mut a: AccountTokenData = try_from_slice_unchecked(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
-                        let a = AccountTokenData::try_from_slice(&receiver_acc.data.try_borrow().ok().unwrap());
-                        match a {
-                            Ok(adt) => {
-                                sol_log("ADT");
-                                sol_log(adt.token_amount.to_string().as_str());
-                                ad = adt;
-                            },
-                            Err(_) => {
-                                sol_log("ERR");
-                                ad = AccountTokenData {token_amount: 0};
-                            }
-                        }
-                        ad.token_amount += amount;
-                        sol_log(ad.token_amount.to_string().as_str());
-
-                        match self.allocate_space(receiver_acc, u64::try_from(mem::size_of::<AccountTokenData>()).unwrap()) {
-                            Ok(_) => {
-                                sol_log("allocated");
-                                let assign_ins = assign(receiver_acc.key, &self.ovn_program_pub);
-                                let v = vec![receiver_acc.clone()];
-                                match invoke(&assign_ins, v.as_slice()) {
-                                    Ok(_) => {
-                                        sol_log("assigned");
-                                        ad.serialize(&mut &mut receiver_acc.data.try_borrow_mut().ok().unwrap()[..]).unwrap();
-                                    }
-                                    Err(_) => {}
-                                }
-                            }
-                            Err(_) => {}
-                        }
                         true
                     }
                     Err(_) => {sol_log("NOT transfered"); false}
@@ -220,14 +188,21 @@ impl<'a> OVNToken {
     }
 
 
-    pub fn balance(&self, acc: &Pubkey, account_infos: &Vec<AccountInfo>) {
-        match sync_native(&self.token_program_pub, acc) {
-            Ok(ins) => {
-                match invoke(&ins, account_infos) {
+    pub fn balance(&self, acc: &AccountInfo, account_infos: &Vec<AccountInfo>) {
+
+        sol_log(acc.owner.to_string().as_str());
+        match sync_native(&self.token_program_pub, acc.key) {
+            Ok(ins_sync) => {
+
+                let v = vec![acc.clone()];
+                match invoke(&ins_sync, v.as_slice()) {
                     Ok(_) => {
-                        sol_log("success")
+                        sol_log("sync native");
+                        let a = acc.lamports.try_borrow().ok().unwrap();
                     }
-                    Err(_) => {}
+                    Err(_) => {
+                        sol_log("err sync native")
+                    }
                 }
             }
             Err(_) => {}
@@ -247,6 +222,9 @@ impl<'a> Exchange<'a> {
     pub fn mint(&self, amount: u64) {
         let accounts_infos_iter = &mut self.account_infos.iter();
 
+        // sol_log("balance");
+        // self.balance();
+
         let receiver = next_account_info(accounts_infos_iter).expect("Cant get sender");
         self.ovn.mint(receiver.key, &mut self.account_infos.clone(), amount);
     }
@@ -254,11 +232,18 @@ impl<'a> Exchange<'a> {
     pub fn balance(&self) {
         let acc_iter = &mut self.account_infos.iter();
 
-        let mut receiver_acc = next_account_info(acc_iter).unwrap();
+        let receiver_acc = next_account_info(acc_iter).unwrap();
+        let token_acc = next_account_info(acc_iter).unwrap();
+        let mint_acc = next_account_info(acc_iter).unwrap();
+        let owner_acc = next_account_info(acc_iter).unwrap();
+        let spl_acc = next_account_info(acc_iter).unwrap();
+        let sysvar_acc = next_account_info(acc_iter).unwrap();
+        let sysprog_acc = next_account_info(acc_iter).unwrap();
+        let mut associated_acc = next_account_info(acc_iter).unwrap();
+        let associated_program_acc = next_account_info(acc_iter).unwrap();
 
-        let acc_token_data: AccountTokenData = AccountTokenData::try_from_slice(&receiver_acc.data.try_borrow().ok().unwrap()).unwrap();
-        sol_log("account balance");
-        sol_log(acc_token_data.token_amount.to_string().as_str());
+        self.ovn.balance(associated_acc, &self.account_infos.clone());
+
     }
 
 }
