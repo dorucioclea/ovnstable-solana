@@ -15,8 +15,6 @@ spl-token = {version = "3.2.0", features = ["no-entrypoint"]}
 spl-associated-token-account = {version = "1.0.3", features = ["no-entrypoint"]}
 
 
-[dependencies.mercurial_stable_swap_n_pool_instructions]
-path = "/Users/evgenijzaharov/CLionProjects/stable-swap-n-pool-instructions"
 
 
 [dev-dependencies]
